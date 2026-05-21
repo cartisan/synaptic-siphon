@@ -1,0 +1,37 @@
+[project]
+name = "synaptic-siphon"
+version = "0.1.0"
+description = "Push-to-talk recorder and dream-stitching story generator."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "sounddevice>=0.4.7",
+    "soundfile>=0.12",
+    "pydub>=0.25",
+    "pynput>=1.7",
+]
+
+[project.scripts]
+siphon-record = "synaptic_siphon.recorder:main"
+siphon-generate = "synaptic_siphon.generator:main"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/synaptic_siphon"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]

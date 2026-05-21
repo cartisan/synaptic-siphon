@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.python-version-local
+
+# uv / virtualenv
+.venv/
+
+.env
+
+# Tooling caches
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Runtime output (kept via .gitkeep)
+recordings/*
+stories/*
+!recordings/.gitkeep
+!stories/.gitkeep
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
