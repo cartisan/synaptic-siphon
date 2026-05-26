@@ -20,6 +20,7 @@ siphon-generate = "synaptic_siphon.generator:main"
 [dependency-groups]
 dev = [
     "ruff>=0.6",
+    "pytest>=8",
 ]
 
 [build-system]

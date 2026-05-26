@@ -7,7 +7,7 @@ from scipy.signal import butter, sosfiltfilt
 
 
 def heart_thump(
-    duration_s: float,
+    n_samples: int,
     sample_rate: int,
     bpm: float,
     fundamental_hz: float,
@@ -18,7 +18,7 @@ def heart_thump(
     Each cycle is a louder ``lub`` followed by a softer ``dub`` ~150 ms later.
     Each beat is a sine at ``fundamental_hz`` with an exponential decay envelope.
     """
-    n = int(duration_s * sample_rate)
+    n = n_samples
     out = np.zeros(n, dtype=np.float32)
     if n == 0 or bpm <= 0:
         return out
@@ -52,7 +52,7 @@ def heart_thump(
 
 
 def bubbles(
-    duration_s: float,
+    n_samples: int,
     sample_rate: int,
     density: float,
     brightness_hz: float,
@@ -61,11 +61,12 @@ def bubbles(
     """Sparse Poisson-timed bubble bursts: rising chirps with a noise tail."""
     if rng is None:
         rng = np.random.default_rng()
-    n = int(duration_s * sample_rate)
+    n = n_samples
     out = np.zeros(n, dtype=np.float32)
     if n == 0 or density <= 0:
         return out
 
+    duration_s = n / sample_rate
     expected = max(1, int(duration_s * density * 1.5))
     intervals = rng.exponential(scale=1.0 / density, size=expected)
     onsets = np.cumsum(intervals)

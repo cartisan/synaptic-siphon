@@ -62,28 +62,27 @@ def generate(cfg: GeneratorConfig) -> Path:
     chosen = _select_clips(cfg, paths, pyrng)
     clips, sr = _load_clips(chosen)
     base = audio.crossfade_concat(clips, sr, cfg.crossfade_ms)
-    duration_s = base.size / sr
 
     mix = base.copy()
     if cfg.heart.volume > 0.0:
         heart = effects.heart_thump(
-            duration_s=duration_s,
+            n_samples=base.size,
             sample_rate=sr,
             bpm=cfg.heart.bpm,
             fundamental_hz=cfg.heart.fundamental_hz,
             beat_decay=cfg.heart.beat_decay,
         )
-        mix = mix + heart[: mix.size] * cfg.heart.volume
+        mix = mix + heart * cfg.heart.volume
 
     if cfg.bubbles.volume > 0.0:
         bubs = effects.bubbles(
-            duration_s=duration_s,
+            n_samples=base.size,
             sample_rate=sr,
             density=cfg.bubbles.density,
             brightness_hz=cfg.bubbles.brightness_hz,
             rng=nprng,
         )
-        mix = mix + bubs[: mix.size] * cfg.bubbles.volume
+        mix = mix + bubs * cfg.bubbles.volume
 
     mix = effects.lowpass(
         mix,
@@ -99,7 +98,7 @@ def generate(cfg: GeneratorConfig) -> Path:
     audio.to_mp3(mix, sr, out_path, bitrate=cfg.output_bitrate)
 
     print(
-        f"wrote {out_path}  ({len(chosen)} clips, {duration_s:.1f}s)",
+        f"wrote {out_path}  ({len(chosen)} clips, {base.size / sr:.1f}s)",
         flush=True,
     )
     return out_path
