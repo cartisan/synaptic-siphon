@@ -14,12 +14,6 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 
-# Runtime output (kept via .gitkeep)
-recordings/*
-stories/*
-!recordings/.gitkeep
-!stories/.gitkeep
-
 # Editor / OS
 .DS_Store
 .idea/
