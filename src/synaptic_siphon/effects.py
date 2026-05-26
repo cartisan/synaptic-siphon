@@ -58,7 +58,7 @@ def bubbles(
     brightness_hz: float,
     rng: np.random.Generator | None = None,
 ) -> np.ndarray:
-    """Sparse Poisson-timed bubble bursts: rising chirps with a noise tail."""
+    """Sparse Poisson-timed bubble bloops: short tonal pings with a rising tail."""
     if rng is None:
         rng = np.random.default_rng()
     n = n_samples
@@ -74,18 +74,37 @@ def bubbles(
 
     for onset_s in onsets:
         start = int(onset_s * sample_rate)
-        burst_len = int(rng.uniform(0.04, 0.12) * sample_rate)
+        burst_len = int(rng.uniform(0.02, 0.08) * sample_rate)
         if burst_len <= 0 or start >= n:
             continue
         burst_len = min(burst_len, n - start)
         t = np.arange(burst_len, dtype=np.float32) / sample_rate
-        f0 = float(rng.uniform(80.0, max(120.0, brightness_hz * 0.25)))
-        f1 = float(rng.uniform(max(f0 + 50.0, brightness_hz * 0.5), brightness_hz))
-        phase = 2.0 * np.pi * (f0 * t + 0.5 * (f1 - f0) / max(t[-1], 1e-6) * t * t)
-        chirp = np.sin(phase).astype(np.float32)
-        env = np.exp(-t * float(rng.uniform(15.0, 35.0))).astype(np.float32)
-        noise_tail = rng.standard_normal(burst_len).astype(np.float32) * 0.15 * env
-        burst = (chirp * env + noise_tail) * float(rng.uniform(0.4, 1.0))
+        T = max(float(t[-1]), 1e-6)
+
+        # Minnaert-style upward sweep: hold near f_body, then rise sharply at the
+        # end as the bubble collapses. Cubic instantaneous frequency puts most of
+        # the rise in the last ~30% of the burst.
+        f_body = float(rng.uniform(brightness_hz * 0.25, brightness_hz * 0.7))
+        f_peak = float(brightness_hz)
+        phase = 2.0 * np.pi * (
+            f_body * t + (f_peak - f_body) * (t**4) / (4.0 * T**3)
+        )
+        tone = np.sin(phase).astype(np.float32)
+
+        env = np.exp(-t * float(rng.uniform(40.0, 70.0))).astype(np.float32)
+        attack_len = min(int(0.001 * sample_rate), burst_len)
+        if attack_len > 1:
+            env[:attack_len] *= np.linspace(0.0, 1.0, attack_len, dtype=np.float32)
+
+        burst = tone * env
+
+        click_len = min(int(0.003 * sample_rate), burst_len)
+        if click_len > 0:
+            burst[:click_len] += (
+                rng.standard_normal(click_len).astype(np.float32) * 0.08
+            )
+
+        burst *= float(rng.uniform(0.4, 1.0))
         out[start : start + burst_len] += burst
 
     peak = float(np.max(np.abs(out)))

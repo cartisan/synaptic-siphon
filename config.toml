@@ -25,7 +25,7 @@ beat_decay = 0.4                # seconds of exponential tail per thump
 
 [generator.bubbles]
 volume = 0.10                   # 0.0 disables
-density = 1.2                   # average bursts per second (Poisson)
+density = 0.17                  # average bursts per second (Poisson) — ~1 every 6 s
 brightness_hz = 1200.0          # top of each bubble's rising chirp
 
 [generator.lowpass]
