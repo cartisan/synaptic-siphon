@@ -4,8 +4,10 @@ Two terminal CLIs that capture short voice memos and stitch random
 ones together into a dreamy, effected "story":
 
 - **`siphon-record`** — hold SPACE to record audio; on release, leading
-  and trailing silence are trimmed and the take is split into 10-second
-  WAV chunks in `recordings/`. ESC quits.
+  and trailing silence are trimmed and the take is split into WAV chunks
+  of 10–20 s, cutting on the next silent gap so chunks don't end
+  mid-word (with a hard 20 s cap). Files land in `recordings/`. ESC
+  quits.
 - **`siphon-generate`** — picks 6–12 random clips from `recordings/`,
   crossfades them together, layers a synthesized heart-thump and
   bubbling sounds on top, applies an underwater low-pass filter, and
@@ -71,8 +73,10 @@ uv run siphon-record
 ```
 
 Hold SPACE while you speak; release to save. The recorder trims the
-silence on either end and writes one or more 10-second WAVs into
-`recordings/`. Press ESC to quit.
+silence on either end and writes one or more WAVs of 10–20 s into
+`recordings/` — each split lands on the next silent gap so chunks don't
+end mid-word, with a hard 20 s cap if no gap is found. Press ESC to
+quit.
 
 ## Run the generator
 

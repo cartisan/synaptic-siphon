@@ -54,21 +54,66 @@ def trim_silence(
     return samples[start:end]
 
 
+def _first_silence_frame(
+    samples: np.ndarray,
+    window_start: int,
+    window_end: int,
+    frame_size: int,
+    threshold_db: float,
+) -> int | None:
+    """Return the sample index of the first silent frame inside the window, or None."""
+    window_end = min(window_end, samples.size)
+    if window_end - window_start < frame_size:
+        return None
+    n_frames = (window_end - window_start) // frame_size
+    view = samples[window_start : window_start + n_frames * frame_size].reshape(
+        n_frames, frame_size
+    )
+    rms = np.sqrt(np.mean(view.astype(np.float64) ** 2, axis=1) + 1e-12)
+    rms_db = 20.0 * np.log10(rms + 1e-12)
+    silent = rms_db <= threshold_db
+    if not silent.any():
+        return None
+    return window_start + int(np.argmax(silent)) * frame_size
+
+
 def split_into_chunks(
     samples: np.ndarray,
     sample_rate: int,
-    chunk_seconds: int,
+    min_chunk_seconds: int,
+    max_chunk_seconds: int,
+    threshold_db: float,
+    silence_min_ms: int,
     drop_last_short: bool,
 ) -> list[np.ndarray]:
-    chunk_size = chunk_seconds * sample_rate
+    """Split into chunks of at least ``min_chunk_seconds``, cutting at the next
+    silent gap when possible, and hard-capping at ``max_chunk_seconds``."""
     if samples.size == 0:
         return []
+    min_size = min_chunk_seconds * sample_rate
+    max_size = max_chunk_seconds * sample_rate
+    frame_size = max(1, int(sample_rate * silence_min_ms / 1000))
+
     chunks: list[np.ndarray] = []
-    for start in range(0, samples.size, chunk_size):
-        chunk = samples[start : start + chunk_size]
-        if chunk.size < chunk_size and drop_last_short:
-            continue
-        chunks.append(chunk)
+    pos = 0
+    while pos < samples.size:
+        remaining = samples.size - pos
+        if remaining < min_size:
+            if not drop_last_short:
+                chunks.append(samples[pos:])
+            break
+        if remaining <= max_size:
+            chunks.append(samples[pos:])
+            break
+        window_start = pos + min_size
+        window_end = pos + max_size
+        split_at = _first_silence_frame(
+            samples, window_start, window_end, frame_size, threshold_db
+        )
+        if split_at is None:
+            split_at = window_end
+        chunks.append(samples[pos:split_at])
+        pos = split_at
     return chunks
 
 

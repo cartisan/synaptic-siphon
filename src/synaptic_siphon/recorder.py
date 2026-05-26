@@ -71,7 +71,10 @@ class Recorder:
         chunks = split_into_chunks(
             trimmed,
             sample_rate=cfg.sample_rate,
-            chunk_seconds=cfg.chunk_seconds,
+            min_chunk_seconds=cfg.min_chunk_seconds,
+            max_chunk_seconds=cfg.max_chunk_seconds,
+            threshold_db=cfg.silence_threshold_db,
+            silence_min_ms=cfg.silence_min_ms,
             drop_last_short=cfg.drop_last_short_chunk,
         )
         if not chunks:

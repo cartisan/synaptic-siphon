@@ -11,7 +11,8 @@ from pathlib import Path
 class RecorderConfig:
     sample_rate: int
     channels: int
-    chunk_seconds: int
+    min_chunk_seconds: int
+    max_chunk_seconds: int
     silence_threshold_db: float
     silence_min_ms: int
     drop_last_short_chunk: bool
@@ -72,7 +73,8 @@ class Config:
             recorder=RecorderConfig(
                 sample_rate=rec["sample_rate"],
                 channels=rec["channels"],
-                chunk_seconds=rec["chunk_seconds"],
+                min_chunk_seconds=rec["min_chunk_seconds"],
+                max_chunk_seconds=rec["max_chunk_seconds"],
                 silence_threshold_db=rec["silence_threshold_db"],
                 silence_min_ms=rec["silence_min_ms"],
                 drop_last_short_chunk=rec["drop_last_short_chunk"],

@@ -4,10 +4,11 @@
 [recorder]
 sample_rate = 44100
 channels = 1
-chunk_seconds = 10
+min_chunk_seconds = 10          # minimum chunk length before we start hunting for a silence boundary
+max_chunk_seconds = 20          # hard cap — split here even mid-word if no silence is found
 silence_threshold_db = -40.0   # frames quieter than this (RMS) are treated as silence
 silence_min_ms = 200            # silence shorter than this is kept (avoids clipping speech)
-drop_last_short_chunk = true    # if the tail is < chunk_seconds, drop it instead of saving a stub
+drop_last_short_chunk = true    # if the tail is < min_chunk_seconds, drop it instead of saving a stub
 
 [generator]
 min_clips = 6
